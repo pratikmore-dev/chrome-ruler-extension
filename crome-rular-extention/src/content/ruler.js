@@ -1,11 +1,6 @@
-// Inject a ruler into the current webpage
-// import Ruler from '../components/Ruler.svelte'
-
 (function () {
-  // Avoid injecting multiple times
   if (document.getElementById("chrome-ruler")) return;
 
-  // Create ruler container
   const ruler = document.createElement("div");
   ruler.id = "chrome-ruler";
   ruler.style.position = "absolute";
@@ -19,17 +14,12 @@
   ruler.style.cursor = "move";
   ruler.style.transformOrigin = "center center";
 
-  // Add text markings (basic)
-  ruler.innerHTML = `
-    <div style="color:#000;font-size:12px;padding:2px;">Ruler (drag + rotate)</div>
-  `;
+  ruler.innerHTML = `<div style="color:#000;font-size:12px;padding:2px;">Ruler</div>`;
 
   document.body.appendChild(ruler);
 
-  // --- Drag functionality ---
-  let isDragging = false;
-  let startX, startY, startLeft, startTop;
-
+  // Dragging
+  let isDragging = false, startX, startY, startLeft, startTop;
   ruler.addEventListener("mousedown", (e) => {
     isDragging = true;
     startX = e.clientX;
@@ -38,25 +28,10 @@
     startTop = parseInt(ruler.style.top, 10);
     e.preventDefault();
   });
-
   document.addEventListener("mousemove", (e) => {
     if (!isDragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    ruler.style.left = startLeft + dx + "px";
-    ruler.style.top = startTop + dy + "px";
+    ruler.style.left = startLeft + (e.clientX - startX) + "px";
+    ruler.style.top = startTop + (e.clientY - startY) + "px";
   });
-
-  document.addEventListener("mouseup", () => {
-    isDragging = false;
-  });
-
-  // --- Rotate functionality with "R" key ---
-  let rotation = 0;
-  document.addEventListener("keydown", (e) => {
-    if (e.key.toLowerCase() === "r") {
-      rotation += 15; // rotate by 15 degrees
-      ruler.style.transform = `rotate(${rotation}deg)`;
-    }
-  });
+  document.addEventListener("mouseup", () => (isDragging = false));
 })();

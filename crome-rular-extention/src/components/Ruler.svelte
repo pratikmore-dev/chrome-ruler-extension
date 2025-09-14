@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
   import { onMount, onDestroy } from 'svelte'
   
   export let visible = false
@@ -9,7 +9,6 @@
   let dragOffset = { x: 0, y: 0 }
   let position = { x: 100, y: 100 }
   
-  // Handle mouse down for dragging
   function handleMouseDown(event) {
     if (event.target.classList.contains('ruler-handle')) {
       isDragging = true
@@ -21,30 +20,28 @@
     }
   }
   
-  // Handle mouse move during drag
   function handleMouseMove(event) {
     if (isDragging) {
       position.x = event.clientX - dragOffset.x
       position.y = event.clientY - dragOffset.y
       
-      // Keep ruler within viewport bounds
+
       const rect = rulerElement.getBoundingClientRect()
       position.x = Math.max(0, Math.min(window.innerWidth - rect.width, position.x))
       position.y = Math.max(0, Math.min(window.innerHeight - rect.height, position.y))
     }
   }
   
-  // Handle mouse up to end drag
+
   function handleMouseUp() {
     isDragging = false
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
   }
   
-  // Generate ruler markings
   function generateMarkings() {
     const markings = []
-    const rulerLength = 400 // 400px ruler
+    const rulerLength = 400 
     
     for (let i = 0; i <= rulerLength; i += 10) {
       const isCentimeter = i % 10 === 0
@@ -55,7 +52,7 @@
         position: i,
         height: isCentimeterMark ? 20 : isHalfCentimeter ? 15 : 8,
         showNumber: isCentimeterMark && i > 0,
-        number: i / 10 // Convert to cm
+        number: i / 10 
       })
     }
     
@@ -71,33 +68,28 @@
   `
   
   onMount(() => {
-    // Center ruler on initial load
     position.x = (window.innerWidth - 400) / 2
     position.y = (window.innerHeight - 60) / 2
   })
   
   onDestroy(() => {
-    // Clean up event listeners
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
   })
-</script>
+</script> -->
 
-<!-- Ruler container -->
-<div 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- <div 
   bind:this={rulerElement}
   class="ruler-container" 
   style={rulerStyle}
   on:mousedown={handleMouseDown}
 >
-  <!-- Drag handle -->
   <div class="ruler-handle">
     <div class="handle-grip"></div>
   </div>
   
-  <!-- Ruler body -->
   <div class="ruler-body">
-    <!-- Top markings -->
     <div class="ruler-markings ruler-top">
       {#each markings as mark}
         <div 
@@ -111,10 +103,8 @@
       {/each}
     </div>
     
-    <!-- Ruler scale line -->
     <div class="ruler-scale"></div>
     
-    <!-- Bottom markings -->
     <div class="ruler-markings ruler-bottom">
       {#each markings as mark}
         <div 
@@ -124,9 +114,10 @@
       {/each}
     </div>
   </div>
-</div>
+</div> -->
 
-<style>
+<!-- <style>
+
   .ruler-container {
     position: fixed;
     z-index: 999999;
@@ -245,11 +236,97 @@
     text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
   }
   
-  /* Prevent text selection during drag */
   .ruler-container * {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+  }
+</style> -->
+
+
+<script>
+  export let visible = false;
+  let rulerRef;
+  let startX = 0;
+  let startY = 0;
+  let endX = 0;
+  let endY = 0;
+  let isDragging = false;
+
+  function handleMouseDown(e) {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    endX = e.clientX;
+    endY = e.clientY;
+  }
+
+  function handleMouseMove(e) {
+    if (isDragging) {
+      endX = e.clientX;
+      endY = e.clientY;
+    }
+  }
+
+  function handleMouseUp() {
+    isDragging = false;
+  }
+
+  $: distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+</script>
+
+<svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />
+
+{#if visible}
+  <div class="ruler-overlay" bind:this={rulerRef}>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div 
+      class="ruler-line"
+      style="
+        left: {Math.min(startX, endX)}px;
+        top: {Math.min(startY, endY)}px;
+        width: {Math.abs(endX - startX)}px;
+        height: {Math.abs(endY - startY)}px;
+      "
+      on:mousedown={handleMouseDown}
+    >
+      <div class="measurement">
+        {Math.round(distance)}px
+      </div>
+    </div>
+  </div>
+{/if}
+
+<style>
+  .ruler-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10000;
+  }
+
+  .ruler-line {
+    position: absolute;
+    border: 2px solid #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+    pointer-events: all;
+    cursor: crosshair;
+  }
+
+  .measurement {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 </style>

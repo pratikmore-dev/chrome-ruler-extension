@@ -3,25 +3,17 @@
   "name": "Chrome Ruler Extension",
   "version": "1.0.0",
   "description": "A transparent ruler overlay for measuring elements on any webpage",
-  "permissions": [
-    "activeTab",
-    "scripting"
-  ],
+  "permissions": ["activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Chrome Ruler"
   },
   "content_scripts": [
     {
-    "matches": ["<all_urls>"],
-    "js": ["assets/content.js"],
-    "run_at": "document_end"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["assets/ruler.css"], 
-      "matches": ["<all_urls>"]
+      "matches": ["<all_urls>"],
+      "js": ["ruler.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
     }
   ]
 }
